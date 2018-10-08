@@ -1,0 +1,25 @@
+restart;
+introots := proc( p )
+local r,q,a,d,v;
+q:=p;
+r:=();
+while subs(x=0,q)=0 do
+ r:=r,0;
+ q:=quo(q,x,x)
+od;
+d:=NumberTheory[Divisors](coeff(q,x,0));
+for a in d union map(x->-x,d) do
+ v:=subs(x=a,q);
+ print(a,v);
+ while v=0 do
+  r:=r,a;
+  q:=quo(q,x-a,x);
+  v:=subs(x=a,q); 
+ end;
+od;
+[r],q;
+end:
+a:=-1,0,0,1,1,-2,2,2; n:=numelems([a]);
+p:=expand(product((x-a[i]),i=1..n));
+introots(p);
+
