@@ -1,4 +1,16 @@
 restart;
+
+horner:=proc(p,a)
+local n,q,i,v;
+     n:=degree(p);	
+	q:=coeff(p,x,n); v:=q;			
+	for i from n-1 by -1 to 0 do
+		v:=v*a+coeff(p,x,i);
+		q:=q,v;
+	end;
+	q;
+end:
+
 introots := proc( p )
 local r,q,a,d,v;
 q:=p;
@@ -19,6 +31,7 @@ for a in d union map(x->-x,d) do
 od;
 [r],q;
 end:
+
 a:=-1,0,0,1,1,-2,2,2; n:=numelems([a]);
 p:=expand(product((x-a[i]),i=1..n));
 introots(p);
