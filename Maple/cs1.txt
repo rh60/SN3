@@ -1,14 +1,18 @@
-horner:=proc(p,a)
-local n,q,i,v;
-     n:=degree(p);	
-	q:=coeff(p,x,n); v:=q;			
-	for i from n-1 by -1 to 0 do
-		v:=v*a+coeff(p,x,i);
-		if i>0 then
-			q:=q,v;
-		end
+horner := proc (P,a)
+local n,br,r2,r3,i;	
+	n:=degree(P);
+	print( seq( coeff(P,x,k), k=n..0, -1  ) );
+	br:=coeff(P,x,n);
+	r3:=br;r2:=a,_;
+	for i from 1 to n do
+		br:=br*a;
+		r2:=r2,br;
+		br:=br+coeff(P,x,n-i);
+		r3:=r3,br;
 	end;
-	[q],v
+	print(r2);
+	print(r3);
+	add( r3[i]*x^(n-i), i=1..n),r3[n+1]
 end:
 
 introots:=proc(p)
