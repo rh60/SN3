@@ -1,36 +1,32 @@
-horner := proc (P,a)
-local n,br,r2,r3,i;	
-	n:=degree(P);
-	print( seq( coeff(P,x,k), k=n..0, -1  ) );
-	br:=coeff(P,x,n);
-	r3:=br;r2:=a,_;
-	for i from 1 to n do
-		br:=br*a;
-		r2:=r2,br;
-		br:=br+coeff(P,x,n-i);
-		r3:=r3,br;
+horner:=proc(p,a)
+	local r1,r2,r3,n,br,k;
+	n:=degree(p);
+	r1:=seq( coeff(p,x,n-k), k=0..n);
+	#print(r1);
+	#print(a);
+	r2:=();
+	br:=coeff(p,x,n);
+	r3:=br;
+	for k from 1 to n do
+		  br:=br*a;
+		  r2:=r2,br;
+		  br:=br+coeff(p,x,n-k);
+		  r3:=r3,br;  
 	end;
-	print(r2);
-	print(r3);
-	add( r3[i]*x^(n-i), i=1..n),r3[n+1]
+	#print(r2); print(r3);
+	#print(_______________________________);
+	r3[n+1], add(r3[k]*x^(n-k),k=1..n);	
 end:
 
-introots:=proc(p)
-local n,q,r,d,a;
-n:=degree(p);
-r:=();
-q:=p;
-while subs(x=0,q)=0 do
-	 r:=r,0;
-	 q:=quo(q,x,x);
+intr:=proc(poly)
+local h,p,n;
+p:=poly;
+h:=horner(p,0);
+while h[1]=0 do	
+	p:=h[2];
+	print(x=0);
+	print(p);	
+	h:=horner(p,0);
 end;
-d:=NumberTheory[Divisors](coeff(q,x,0));
-for a in d union map(x->-x,d) do
-	while subs(x=a,q)=0 do
-		r:=r,a;
-		q:=quo(q,x-a,x);
-	end;
+NumberTheory[Divisors](coeff(p,x,0));
 end;
-[r],q
-end:
-	
