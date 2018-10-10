@@ -1,0 +1,32 @@
+horner:=proc(p,a)
+local n,q,i,v;
+     n:=degree(p);	
+	q:=coeff(p,x,n); v:=q;			
+	for i from n-1 by -1 to 0 do
+		v:=v*a+coeff(p,x,i);
+		if i>0 then
+			q:=q,v;
+		end
+	end;
+	[q],v
+end:
+
+introots:=proc(p)
+local n,q,r,d,a;
+n:=degree(p);
+r:=();
+q:=p;
+while subs(x=0,q)=0 do
+	 r:=r,0;
+	 q:=quo(q,x,x);
+end;
+d:=NumberTheory[Divisors](coeff(q,x,0));
+for a in d union map(x->-x,d) do
+	while subs(x=a,q)=0 do
+		r:=r,a;
+		q:=quo(q,x-a,x);
+	end;
+end;
+[r],q
+end:
+	
