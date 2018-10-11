@@ -24,4 +24,6 @@ c=M\b
 P=Poly(c)
 
 t=Ming.linspace(0,1,300)
+
+figure(size=(1000,500))
 plot(t,f.(t),t,P(t))
