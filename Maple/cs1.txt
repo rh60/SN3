@@ -1,4 +1,42 @@
 poly:=proc(a)
+	local p,r;
+	p:=1;
+	for r in a do
+		p:=p*(x-r);
+	end;
+	expand(p);
+end:
+
+horner:=proc(p,a)
+	local i,n,H;
+	n:=degree(p);
+	H:=Matrix(3,n+1);
+	H[2,1]:=a;
+	for i from 0 to n do
+		H[1,i+1]:=coeff(p,x,n-i);	
+	end;
+	H[3,1]:=H[1,1];
+	for i from 1 to n do
+		H[2,i+1]:=H[3,i]*a;
+		H[3,i+1]:=H[1,i+1]+H[2,i+1];
+	end;
+	printf("%4d",H);	
+	H[3,n+1],add(H[3,i]*x^(n-i),i=1..n);	
+end:
+
+cand:=proc(p)
+	local i,c;
+	i:=0;
+	while coeff(p,x,i)=0 do
+		i:=i+1;
+	end;
+	c:=coeff(p,x,i);
+	c:=NumberTheory[Divisors](c);
+	c:=op(c);
+	0,c,-c;
+end:
+
+poly:=proc(a)
 local n;	
  	n:=numelems(a);
 	expand(product(x-a[i],i=1..n));
