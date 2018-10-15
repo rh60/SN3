@@ -20,7 +20,7 @@ horner:=proc(p,a)
 		H[2,i+1]:=H[3,i]*a;
 		H[3,i+1]:=H[1,i+1]+H[2,i+1];
 	end;
-	printf("%4d",H);	
+	printf("%4d\n\n",H);		
 	H[3,n+1],add(H[3,i]*x^(n-i),i=1..n);	
 end:
 
@@ -36,48 +36,19 @@ cand:=proc(p)
 	0,c,-c;
 end:
 
-poly:=proc(a)
-local n;	
- 	n:=numelems(a);
-	expand(product(x-a[i],i=1..n));
-end:
-
-horner:=proc(p,a)
-	local r1,r2,r3,n,br,k;
-	n:=degree(p);
-	if n=0 then
-		return p,p;
-	end;
-	r1:=seq( coeff(p,x,n-k), k=0..n);
-	print(r1);
-	print(a);
-	r2:=();
-	br:=coeff(p,x,n);
-	r3:=br;
-	for k from 1 to n do
-		  br:=br*a;
-		  r2:=r2,br;
-		  br:=br+coeff(p,x,n-k);
-		  r3:=r3,br;  
-	end;
-	print(r2); print(r3);
-	print(_______________________________);
-	r3[n+1], add(r3[k]*x^(n-k),k=1..n);	
-end:
-
 intr:=proc(poly)
-local h,p,a,d;
-p:=poly;
-d:=NumberTheory[Divisors](coeffs(p)[-1]);
-d:=0,op(d),op(map(x->-x,d));
-for a in d do
- h:=horner(p,a);
- while h[1]=0 do	
-	p:=h[2];
-	print(x=a);
-	print(p);	
-	h:=horner(p,a);
- end;
-end;
-return p;
+	local h,p,a,d,r;
+	p:=poly;
+	d:=cand(p);
+	r:=();
+	for a in d do
+	 h:=horner(p,a);
+	 while h[1]=0 do	
+		p:=h[2];
+		r:=r,a;
+		print(p);			
+		h:=horner(p,a);
+	 end;
+	end;
+	return r;
 end:
