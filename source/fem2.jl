@@ -47,17 +47,17 @@ end
 function fem2(x)
     # define p(x), q(x), r(x), f(x), u_a, eta_b
     # definuj p(x), q(x), r(x), f(x), u_a, eta_b
-    p(x) = -x;
-    q(x) = -(2*x+3);
-    r(x) = x+2;
-    f(x) = x^3*exp(2*x);
-    u_a = exp(1);
-    eta_b = -5*exp(1)*exp(1);
+    p(x) = -x
+    q(x) = -(2*x+3)
+    r(x) = x+2
+    f(x) = x^3*exp(2*x)
+    u_a = exp(1)
+    eta_b = -5*exp(1)*exp(1)
     # Deduce number of elements
-    N = length(x)-1;
+    N = length(x)-1
     # Initialise A and b to zero
-    A = zeros(N+1, N+1);
-    b = zeros(N+1);
+    A = zeros(N+1, N+1)
+    b = zeros(N+1)
     # Loop over elements calculating local contributions and
     # inserting into linear system
     for k = 1:N
