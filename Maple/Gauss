@@ -1,0 +1,72 @@
+Lagrange:=proc(n::posint)
+local l,L,k,lst,dlst;
+L:=mul((x-k/n),k=0..n);
+lst:=();
+dlst:=();
+for k from 0 to n do
+	l:=L/(x-k/n);
+	l:=l/subs(x=k/n,l);
+	lst:=lst,l;
+	dlst:=dlst,simplify(diff(l,x));
+end; 
+[lst],[dlst];	
+end proc:
+
+gauleg := proc(n::posint)
+   local eps,m,xg,wg,z,h,i,j,k,p1,p2,p3,pp,maxit;
+   maxit := 2*Digits;
+   Digits := Digits+3;
+   eps := Float(5,4-Digits);
+   m := trunc((n+1)/2);
+   xg := [];
+   wg := [];
+   for i from 1 to m do
+      z := evalf(cos(Pi*(i-0.25)/(n+0.5))); # approximation for root
+      for k from 1 to maxit do
+         # evaluate Legendre poly & derivative at z
+         p1 := 1;
+         p2 := 0;
+         for j from 1 to n do
+            p3 := p2;
+            p2 := p1;
+            p1 := ((2*j-1)*z*p2-(j-1)*p3)/j;
+         end do;
+         pp := n*(z*p1-p2)/(z*z-1);# value of derivative
+         h := p1/pp;
+         z := z-h;
+         if abs(h)<eps then break end if;
+      end do;
+      if k=maxit+1 then
+         error "reached max iterations, %1, without convegence to root",maxit;
+      end if;
+      xg := [op(xg),z]; # node
+      wg := [op(wg),2/((1-z*z)*pp*pp)]; # weight
+   end do;
+   Digits := Digits-3;
+   xg := evalf(xg);
+   wg := evalf(wg);
+   if member(0.,xg) or member(-0.,xg) then
+      xg := [seq(-xg[i],i=1..m-1),seq(xg[m-i],i=0..m-1)];
+      wg := [op(wg),seq(wg[m-i],i=1..m-1)];
+   else
+      xg := [op(-xg),seq(xg[m-i],i=0..m-1)];
+      wg := [op(wg),seq(wg[m-i],i=0..m-1)];
+   end if;
+   map(x->1/2+x/2,xg),wg/2;
+end proc:
+
+gxw:=proc(n)
+	local xg,wg,x,w,i;
+	Digits:=20;
+	xg:=();wg:=();
+	for i from 1 to n do
+		x,w:=gauleg(i):
+		xg:=xg,x;
+		wg:=wg,w;
+	end;
+	[xg],[wg];
+end proc;
+
+
+
+	
