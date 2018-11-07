@@ -1,0 +1,22 @@
+gen:=proc(n,k)
+	local g,i;
+	g:=();
+	for i from 0 to n do
+		if i<>k then
+			g:=g,i;
+		end;			
+	end;
+	[g];
+end:
+
+l:=proc(n,k)
+	local temp,i;
+	temp:=mul(x-i/n,i=gen(n,k));
+	temp:=temp/subs(x=k/n,temp);
+end:
+
+n:=3;
+L:=seq(l(n,k),k=0..n);
+dL:=seq(diff(l(n,k),x),k=0..n);
+seq(CodeGeneration['Julia'](L[i]),i=1..n+1);
+seq(CodeGeneration['Julia'](dL[i]),i=1..n+1);
