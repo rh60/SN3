@@ -1,3 +1,5 @@
+with(PolynomialTools):
+
 gen:=proc(n,k)
 	local g,i;
 	g:=();
@@ -13,10 +15,13 @@ l:=proc(n,k)
 	local temp,i;
 	temp:=mul(x-i/n,i=gen(n,k));
 	temp:=temp/subs(x=k/n,temp);
+	expand(temp);
 end:
 
 n:=3;
-L:=seq(l(n,k),k=0..n);
-dL:=seq(diff(l(n,k),x),k=0..n);
-seq(CodeGeneration['Julia'](L[i]),i=1..n+1);
-seq(CodeGeneration['Julia'](dL[i]),i=1..n+1);
+L:=[seq(Poly(CoefficientList(l(n,k),x)),k=0..n)]:
+dL:=[seq(Poly(CoefficientList(diff(l(n,k),x),x)),k=0..n)]:
+
+with(CodeGeneration):
+Julia(L);
+Julia(dL); 
