@@ -99,8 +99,12 @@ function test(E,N::Integer,n::Integer,nq::Integer=3)
     norm(u.(msh.x)-U)
 end
 
-N=10
-r1=test(Lagrange,1000*N,1,3)
-r2=test(Lagrange,N,6,8)
-r3=test(Chebyshev,N,6,8)
-@show r1 r2 r3
+N=10; n=1
+@show N n
+@show test(Lagrange,1000*N,1,3)
+
+for n=2:8
+    @show N n
+    @show test(Lagrange,N,n,n+2)
+    @show test(Chebyshev,N,n,n+2)
+end

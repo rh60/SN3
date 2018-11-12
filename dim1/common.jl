@@ -1,5 +1,6 @@
 using FastGaussQuadrature
 using LinearAlgebra
+using Polynomials
 using MATLAB
 
 struct Quad
