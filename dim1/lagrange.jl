@@ -1,4 +1,4 @@
-function LagrangeBase(n::Integer)
+function LagrangeBase(n::Int)
     if n==1
             [x->1-x, x->x],
             [x->-1, x->1]
@@ -90,7 +90,7 @@ struct Lagrange
     l
     dl
     degree
-    function Lagrange(degree::Integer)
+    function Lagrange(degree::Int)
         l,dl=LagrangeBase(degree)
         new(l,dl,degree)
     end

@@ -2,8 +2,8 @@ struct Chebyshev
     nodes::Vector{Float64}
     weights::Vector{Float64}
     derivatives::Matrix{Float64}
-    degree::Integer
-    function Chebyshev(n::Integer)
+    degree::Int
+    function Chebyshev(n::Int)
         r=n:-1:0
         ch2(j)=cos(j*π/n)
         nodes=(ch2.(r).+1)/2
@@ -24,7 +24,7 @@ struct Chebyshev
     end
 end
 
-function InterpolateCardinal(E::Chebyshev,k::Integer,x::Vector{Float64})
+function InterpolateCardinal(E::Chebyshev,k::Int,x::Vector{Float64})
     n = length(E.nodes)
     m = length(x)
     denom = zeros(m)
@@ -90,7 +90,7 @@ function Interpolate(E::Chebyshev,f,interpolx::Vector{Float64})
     Interpolate(E,f.(t),x)
 end
 
-function Quadrature(E::Chebyshev,nq::Integer)
+function Quadrature(E::Chebyshev,nq::Int)
     n=E.degree
     Q=Quad(nq)
     L=Vector{Vector{Float64}}(undef,n+1)

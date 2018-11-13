@@ -1,12 +1,14 @@
 using FastGaussQuadrature
 using LinearAlgebra
+using SparseArrays
+using SuiteSparse
 using Polynomials
 using MATLAB
 
 struct Quad
     Points::Vector{Float64}
     Weights::Vector{Float64}
-    function Quad(nq::Integer)
+    function Quad(nq::Int)
         x,w = gausslegendre(nq)
         new( (x.+1)/2, w/2 )
     end

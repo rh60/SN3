@@ -1,7 +1,7 @@
 include("common.jl")
 
 struct BoundaryCondition
-    code::Integer # 0 Dirichlet 1 Newton
+    code::Int # 0 Dirichlet 1 Newton
     value::Float64
 end
 
@@ -14,8 +14,8 @@ struct BoundaryValueProblem
     Right::BoundaryCondition # vpravo
 end
 
-@inline function CalculateContributionOnElement(problem::BoundaryValueProblem,
-    x::Vector{Float64},
+@inline function CalculateContributionOnElement!(problem::BoundaryValueProblem,
+    x::Vector{Float64}, A::Matrix{Float64}, b::Vector{Float64},
     Q::Quad, L::Vector{Vector{Float64}}, dL::Vector{Vector{Float64}})
     h=x[end]-x[1]
     t=x[1].+Q.Points*h
@@ -24,7 +24,6 @@ end
     r=problem.r.(t)
     f=problem.f.(t)
     nl=length(L)
-    A=zeros(nl,nl)
     for i=1:nl
         for j=1:nl
             temp = 1/h^2 * p .* dL[i] .* dL[j] +
@@ -33,7 +32,6 @@ end
             A[i,j] = h * intSum(temp,Q)
         end
     end
-    b=zeros(nl)
     for i=1:nl
         temp = f .* L[i]
         b[i] = h * intSum(temp,Q)
@@ -42,16 +40,49 @@ end
     return A,b
 end
 
-function fem(bvp::BoundaryValueProblem, E, msh::Mesh, nq::Integer)
+@inline function CalculateContributionOnElement!(problem::BoundaryValueProblem,
+    x::Vector{Float64}, globix::Int, ins::Int,
+    I::Vector{Int}, J::Vector{Int}, V::Vector{Float64},
+    b::Vector{Float64},
+    Q::Quad, L::Vector{Vector{Float64}}, dL::Vector{Vector{Float64}})
+    h=x[end]-x[1]
+    t=x[1].+Q.Points*h
+    p=problem.p.(t)
+    q=problem.q.(t)
+    r=problem.r.(t)
+    f=problem.f.(t)
+    nl=length(L)
+    for i=1:nl
+        for j=1:nl
+            temp = 1/h^2 * p .* dL[i] .* dL[j] +
+            1/h * q .* L[i] .* dL[j] +
+            r .* L[i] .* L[j]
+            I[ins] = globix+i
+            J[ins] = globix+j
+            V[ins] = h * intSum(temp,Q)
+            ins += 1
+        end
+    end
+    for i=1:nl
+        temp = f .* L[i]
+        b[i] = h * intSum(temp,Q)
+    end
+    ins
+end
+
+function fem(bvp::BoundaryValueProblem, E, msh::Mesh, nq::Int)
     L, dL, Q = Quadrature(E,nq)
     ndof = msh.N * msh.n + 1
     A=zeros(ndof,ndof)
     b=zeros(ndof)
     ix = 1
+    n=E.degree+1
+    locA=zeros(n,n)
+    locb=zeros(n)
     for k=1:msh.N
         ir = ix:ix+msh.n
         x = msh.x[ir]
-        locA,locb = CalculateContributionOnElement(bvp,x,Q,L,dL)
+        CalculateContributionOnElement!(bvp,x,locA,locb,Q,L,dL)
         A[ir,ir]+=locA
         b[ir]+=locb
         ix += msh.n
@@ -70,12 +101,52 @@ function fem(bvp::BoundaryValueProblem, E, msh::Mesh, nq::Integer)
     else
         b[end] += bvp.Right.value
     end
-    write_matfile("data/LAb.mat", A=A, b=b)
+    #write_matfile("data/LAb.mat", A=A, b=b)
     u=A\b
     return u
 end
 
-function test(E,N::Integer,n::Integer,nq::Integer=3)
+function femSparse(bvp::BoundaryValueProblem, E, msh::Mesh, nq::Int)
+    L, dL, Q = Quadrature(E,nq)
+    ndof = msh.N * msh.n + 1
+    b=zeros(ndof)
+    ix = 1
+    n=E.degree+1
+    sz=n*n*msh.N
+    @show sz
+    I=zeros(Int,sz)
+    J=zeros(Int,sz)
+    V=zeros(Float64,sz)
+    locb=zeros(n)
+    ins=1
+    for k=1:msh.N
+        ir = ix:ix+msh.n
+        x = msh.x[ir]
+        ins=CalculateContributionOnElement!(bvp,x,ix-1,ins,I,J,V,locb,Q,L,dL)
+        b[ir]+=locb
+        ix += msh.n
+    end
+    A=sparse(I,J,V)
+    if bvp.Left.code==0
+        A[1,:] .= 0
+        A[1,1] = 1
+        b[1]=bvp.Left.value
+    else
+        b[1]+=bvp.Left.value
+    end
+    if bvp.Right.code==0
+        A[end,:] .= 0
+        A[end,end] = 1
+        b[end] = bvp.Right.value
+    else
+        b[end] += bvp.Right.value
+    end
+    #@show A
+    u=A\b
+    return u
+end
+
+function test(E,N::Int,n::Int,nq::Int=3)
     p(x) = -x
     q(x) = -(2*x+3)
     r(x) = x+2
@@ -87,7 +158,7 @@ function test(E,N::Integer,n::Integer,nq::Integer=3)
     ele = E(n)
 
     msh = Mesh(ele,0.5,1,N)
-    @time U=fem(bvp,ele,msh,nq)
+    @time U=femSparse(bvp,ele,msh,nq)
 
     e=exp(1)
     E=3*e+sqrt(e)/4
@@ -99,10 +170,11 @@ function test(E,N::Integer,n::Integer,nq::Integer=3)
     norm(u.(msh.x)-U)
 end
 
-N=10; n=1
+N=1000; n=1
 @show N n
-@show test(Lagrange,1000*N,1,3)
+@show test(Lagrange,N,1,3)
 
+N=10
 for n=2:8
     @show N n
     @show test(Lagrange,N,n,n+2)

@@ -1,7 +1,7 @@
 struct Mesh
     x::Vector{Float64}
-    N::Integer
-    n::Integer
+    N::Int
+    n::Int
     function Mesh(E::Lagrange,a,b,N)
         n=E.degree
         r=r=range(a,stop=b,length=n*N+1)
