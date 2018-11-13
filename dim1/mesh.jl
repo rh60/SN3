@@ -4,7 +4,7 @@ struct Mesh
     n::Int
     function Mesh(E::Lagrange,a,b,N)
         n=E.degree
-        r=r=range(a,stop=b,length=n*N+1)
+        r=range(a,stop=b,length=n*N+1)
         x=collect(r)
         new(x,N,n)
     end
