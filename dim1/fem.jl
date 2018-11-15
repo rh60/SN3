@@ -35,9 +35,7 @@ end
     for i=1:nl
         temp = f .* L[i]
         b[i] = h * intSum(temp,Q)
-    end
-    #@show A b
-    return A,b
+    end    
 end
 
 @inline function CalculateContributionOnElement!(problem::BoundaryValueProblem,
