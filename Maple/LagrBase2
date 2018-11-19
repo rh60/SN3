@@ -1,0 +1,23 @@
+n:=2;
+l:=x->1,seq(unapply(mul( (n*x-i)/(k+1-i) ,i=0..k),x),k=0..n-1);
+L:=():L1:=():L2:=():
+h:=1/n;
+P:=():
+for i from 0 to n do
+	for j from 0 to n-i do
+		P:=P,[i*h,j*h];
+		tmp:=expand(l[i+1](x)*l[j+1](y)*l[n+1-i-j](1-x-y));		
+		L:=L,tmp;
+		L1:=L1,diff(tmp,x);
+		L2:=L2,diff(tmp,y);;
+	end;
+end:
+L;
+L1;
+L2;
+P;
+N:=numelems([P]);
+for i from 1 to N do
+	f:=unapply(L[i],x,y);
+	seq(f(op(P[i])),i=1..N);
+end;
