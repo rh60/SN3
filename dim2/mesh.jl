@@ -11,6 +11,10 @@ struct Mesh
     x::Vector{Float64}
     y::Vector{Float64}
     tri::Matrix{Int}
+    xleft::Vector{Int}
+    xright::Vector{Int}
+    yleft::Vector{Int}
+    yright::Vector{Int}
     #n::Int
     function Mesh(R::Rectangle,nx::Int,ny::Int)
         rx=range(R.ax,stop=R.bx,length=nx+1)
@@ -37,7 +41,11 @@ struct Mesh
             end
             i += 1
         end
-        new(ax,ay,tri)
+        xleft=collect(1:nx+1:(nx+1)*ny+1)
+        xright=collect(nx+1:nx+1:(nx+1)*(ny+1))
+        yleft=collect(1:nx+1)
+        yright=collect((nx+1)*ny+1:(nx+1)*(ny+1))
+        new(ax,ay,tri,xleft,xright,yleft,yright)
     end
 end
 
