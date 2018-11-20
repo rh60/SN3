@@ -34,8 +34,8 @@ struct Mesh
         j=1
         for iy=1:ny
             for ix=1:nx
-                tri[j,:]=[i,i+1,i+nx+2]
-                tri[j+1,:]=[i,i+nx+2,i+nx+1]
+                tri[j,:]=[i,i+1,i+nx+1]
+                tri[j+1,:]=[i+1,i+nx+2,i+nx+1]
                 i += 1
                 j += 2
             end
@@ -51,9 +51,10 @@ end
 
 function testMesh()
     R=Rectangle(0,2,0,1)
-    msh=Mesh(R,6,3)
+    msh=Mesh(R,10,5)
     write_matfile("data/msh.mat",msh=msh)
-    msh
+    mxcall(:addpath,0,raw"d:\documents\julia\Ming\dim2")
+    mxcall(:show,0)
 end
 
-testMesh()
+#testMesh()

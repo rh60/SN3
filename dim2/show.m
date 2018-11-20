@@ -1,5 +1,5 @@
 clear;clc;close;
-load('../data/msh.mat');
+load('data/msh.mat');
 triplot(double(msh.tri),msh.x,msh.y);
 for i=1:numel(msh.x)
     text(msh.x(i),msh.y(i),int2str(i));
@@ -16,6 +16,6 @@ colors = {'red','green','blue','black'};
 for i=1:4
     s=sides{i};
     plot(msh.x(s),msh.y(s),'o','MarkerFaceColor',colors{i});
-end    
+end
 axis equal
 axis off
