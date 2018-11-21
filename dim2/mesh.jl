@@ -1,10 +1,10 @@
 using MATLAB
 
 struct Rectangle
-    ax::Float64
-    bx::Float64
-    ay::Float64
-    by::Float64
+    xleft::Float64
+    xright::Float64
+    yleft::Float64
+    yright::Float64
 end
 
 struct Mesh
@@ -17,8 +17,8 @@ struct Mesh
     yright::Vector{Int}
     #n::Int
     function Mesh(R::Rectangle,nx::Int,ny::Int)
-        rx=range(R.ax,stop=R.bx,length=nx+1)
-        ry=range(R.ay,stop=R.by,length=ny+1)
+        rx=range(R.xleft,stop=R.xright,length=nx+1)
+        ry=range(R.xleft,stop=R.yright,length=ny+1)
         ax=zeros((nx+1)*(ny+1))
         ay=zeros((nx+1)*(ny+1))
         tri=zeros(Int,2*nx*ny,3)

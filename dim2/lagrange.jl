@@ -118,14 +118,50 @@ function LagrangeBase(n::Int)
         end
 end
 
+function Nodes(degree::Int)
+        h=1/degree;
+        n=((degree+1)*(degree+2)//2).num
+        x=zeros(n)
+        y=zeros(n)
+        x[1:3]=[0 1 0]
+        y[1:3]=[0 0 1]
+        ix=4
+        for i=1:degree-1
+                x[ix]=i*h
+                y[ix]=0
+                ix += 1
+        end
+        for i=1:degree-1
+                x[ix]=1-i*h
+                y[ix]=i*h
+                ix += 1
+        end
+        for i=1:degree-1
+                x[ix]=0
+                y[ix]=1-i*h
+                ix += 1
+        end
+        for j=1:degree-1
+                for i=1:degree-1-j
+                        x[ix]=i*h
+                        y[ix]=j*h
+                        ix += 1
+                end
+        end
+        return x,y
+end
+
 struct Lagrange
         l
         l1
         l2
         degree
+        x
+        y
         function Lagrange(degree::Int)
                 l,l1,l2=LagrangeBase(degree)
-                new(l,l1,l2,degree)
+                x,y=Nodes(degree)
+                new(l,l1,l2,degree,x,y)
         end
 end
 
@@ -145,11 +181,9 @@ end
 
 function LinearTranform(elx::Vector{Float64},ely::Vector{Float64})
         E=Lagrange(1)
-        @inline ϕ(x,y)=[elx[1]*E.l[1](x,y)+elx[2]*E.l[2](x,y)+elx[3]*E.l[3](x,y)
-                        ely[1]*E.l[1](x,y)+ely[2]*E.l[2](x,y)+ely[3]*E.l[3](x,y)]
-
-        Jϕ=det([-elx[1]+elx[2] -elx[1]+elx[3]
-                -ely[1]+ely[2] -ely[1]+ely[3]])
-
-        return ϕ, Jϕ
+        @inline ϕ1(x,y)=elx[1]*E.l[1](x,y)+elx[2]*E.l[2](x,y)+elx[3]*E.l[3](x,y)
+        @inline ϕ2(x,y)=ely[1]*E.l[1](x,y)+ely[2]*E.l[2](x,y)+ely[3]*E.l[3](x,y)
+        Jϕ=(elx[2]-elx[1])*(ely[3]-ely[1])-(elx[3]-elx[1])*(ely[2]-ely[1])
+        invJT=[ely[3] - ely[1] -ely[2] + ely[1]; -elx[3] + elx[1] elx[2] - elx[1]]/Jϕ
+        return ϕ1, ϕ2, Jϕ, invJT
 end
