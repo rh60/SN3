@@ -1,4 +1,5 @@
-using MATLAB
+﻿using MATLAB
+using SparseArrays
 
 struct Rectangle
     xmin::Float64
@@ -35,25 +36,20 @@ function numInternalPointsTri(n::Int)::Int
     numPointsTri(n-3)
 end
 
-function numPointsLine(n::Int)::Int
+function numPointsSeg(n::Int)::Int
     n-1
 end
 
-function refTriPattern(n::Int,e1=true,e2=true,e3=true)
-    np=numPointsTri(n)-3
+function refLine(n::Int)
+    h=1//n
+    Float64.((1:numPointsSeg(n))*h)
+end
+
+function refTri(n::Int)
+    h=1//n
+    np=numInternalPointsTri(n)
     x=Float64[]; sizehint!(x,np)
     y=Float64[]; sizehint!(x,np)
-    h=1//n; z=zeros(n-1)
-    s=Float64.((1:n-1)*h); r=reverse(s)
-    if e1
-        append!(x,s); append!(y,z)
-    end
-    if e2
-        append!(x,r); append!(y,s)
-    end
-    if e3
-        append!(x,z); append!(y,r)
-    end
     for j=1:n-1
         for i=1:n-j-1
             push!(x,Float64(i*h))
@@ -63,6 +59,13 @@ function refTriPattern(n::Int,e1=true,e2=true,e3=true)
     return Pattern(x,y)
 end
 
+@inline function appendPoints!(x,y,T,p::Vector{Float64})
+    Px=x[T]; Py=y[T]
+    append!(x,affinity(Px,p))
+    append!(y,affinity(Py,p))
+    return length(x)
+end
+
 @inline function appendPoints!(x,y,T,p::Pattern)
     Px=x[T]; Py=y[T]
     append!(x,affinity(Px,p.x,p.y))
@@ -70,30 +73,65 @@ end
     return length(x)
 end
 
-@inline function appendIndices!(indices::Vector{Int},count::Int,shift::Int)::Int
-    ix=1:count
-    append!(indices,shift .+ ix)
-    return shift+count
+mutable struct EdgeInfo
+    tri::Int
+    loc::Int
+    created::Bool
+    function EdgeInfo(t::Int,l::Int)
+        new(t,l,false)
+    end
 end
 
-@inline function createIndices(shift::Int,n::Int,e1=Int[],e2=Int[],e3=Int[])
-    n1=numPointsLine(n)
-    edges=(e1,e2,e3)
-    indices=Int[];  sizehint!(indices,numPointsTri(n))
-    for e in edges
-        if length(e)==0
-            shift=appendIndices!(indices,n1,shift)
+@inline function pushEdgeInfo!(k,l,tri,I,J,Id,efo)
+    li=l;
+    if l==3
+        lj=1
+    else
+        lj=l+1
+    end
+    i=tri[k,li]; j=tri[k,lj]
+    push!(I,i); push!(J,j); push!(Id,length(I))
+    push!(efo,EdgeInfo(k,l))
+end
+
+@inline function appendEdge!(k,l,tri,E,efo,edges)
+    li=l
+    if l==3
+        lj=1
+    else
+        lj=l+1
+    end
+    i=tri[k,li]; j=tri[k,lj];
+    id1=E[i,j]; id2=E[j,i]
+    if !efo[id1].created
+        if  id2==0
+            push!(edges,[i, j, efo[id1].tri, efo[id1].loc])
+            efo[id1].created=true
         else
-            append!(indices,e)
+            push!(edges,[i, j, efo[id1].tri, efo[id1].loc, efo[id2].tri, efo[id2].loc])
+            efo[id1].created=true
+            efo[id2].created=true
         end
     end
-    n2=numInternalPointsTri(n)
-    appendIndices!(indices,n2,shift)
-    return indices, [1:n1, n1+1:2*n1, 2*n1+1:3*n1]
 end
 
-@inline function selectEdgeIndices(i::Vector{Int},k::Int)
-
+function createEdges(tri::Matrix{Int})
+    I=Int[];J=Int[];Id=Int[]
+    efo=EdgeInfo[]
+    nt=size(tri,1)
+    for k=1:nt
+        for l=1:3
+            pushEdgeInfo!(k,l,tri,I,J,Id,efo)
+        end
+    end
+    E=sparse(I,J,Id)
+    edges=Vector{Int}[]
+    for k=1:nt
+        for l=1:3
+            appendEdge!(k,l,tri,E,efo,edges)
+        end
+    end
+    return edges
 end
 
 function Mesh(R::Rectangle,nx::Int,ny::Int,n::Int=1)
@@ -107,7 +145,7 @@ function Mesh(R::Rectangle,nx::Int,ny::Int,n::Int=1)
         push!(x,px); push!(y,py)
     end
     lin(i,j)=n1*(j-1)+i
-    npt=numPoints(n)
+    npt=numPointsTri(n)
     tri=zeros(Int,nt,npt)
     for (k,(i,j)) in enumerate(Iterators.product(1:nx,1:ny))
         r=[lin(i,j) lin(i+1,j) lin(i+1,j+1) lin(i,j+1)]
@@ -115,21 +153,35 @@ function Mesh(R::Rectangle,nx::Int,ny::Int,n::Int=1)
         tri[2*k,1:3]=[r[2] r[3] r[4]]
     end
 
-    # Create nodes of Lagrange element
-    # index of the last point
-    shift=length(x)
     if n>1
-        p1=refTriPattern(n)
-        p2=refTriPattern(n,true,true,false)
-        ltp=length(tp1.x)
-        nl=numPointsLine(n)
-        for k=1:2:nt
-            temp,ie=createIndices(shift,n)
-            tri[k,4:end]=temp
-            temp=temp[ie[2]]
-            shift=appendPoints!(x,y,tri[k,1:3],p1)
-            tri[k+1,4:end]=createIndices(shift,n,[],[],temp)[1]
-            shift=appendPoints!(x,y,tri[k+1,1:3],p2)
+        # Create nodes of Lagrange element
+        # index of the last point
+        shift=length(x)
+        edges=createEdges(tri)
+        lp=refLine(n)
+        nlp=length(lp)
+        rlp=1:nlp
+        ne=length(edges)
+        for i=1:ne
+            e=edges[i]
+            start=3 + (e[4]-1)*nlp
+            tri[e[3],start .+ rlp] = shift .+ rlp
+            shift=appendPoints!(x,y,e[1:2],lp)
+            if length(e)==6
+                start=3 + (e[6]-1)*nlp
+                tri[e[5],start .+ rlp] = shift .+ reverse(rlp)
+            end
+        end
+        if n>2
+            tp=refTri(n)
+            ntp=length(tp.x)
+            rtp=1:ntp
+            start=3 + 3*nlp
+            for k=1:nt
+                t=tri[k,1:3]
+                tri[k,start .+ rtp] = shift .+ rtp
+                shift=appendPoints!(x,y,t,tp)
+            end
         end
     end
 
@@ -153,5 +205,4 @@ function testMesh()
     #mxcall(:show,0)
 end
 
-T=refTriPattern(4)
 msh=testMesh()
