@@ -1,21 +1,27 @@
 clear;clc;close;
-load('data/msh.mat');
-triplot(double(msh.tri),msh.x,msh.y);
-for i=1:numel(msh.x)
-    text(msh.x(i),msh.y(i),int2str(i));
-end
-for i=1:size(msh.tri)
-    x=mean(msh.x(msh.tri(i,:)));
-    y=mean(msh.y(msh.tri(i,:)));
-    text(x,y,int2str(i));
-end
+load('../data/msh.mat');
+tri=double(msh.tri(:,1:3));
+triplot(tri,msh.x,msh.y);
+
+
+% for i=1:length(msh.tri)
+%     x=mean(msh.x(tri(i,1:3)));
+%     y=mean(msh.y(tri(i,1:3)));
+%     text(x,y,int2str(i));
+% end
+
+t=msh.tri;
+for it=t
+    text(msh.x(it),msh.y(it),int2str(it));
+end    
 
 hold on
-sides = {msh.yleft,msh.yright,msh.xleft,msh.xright};
 colors = {'red','green','blue','black'};
-for i=1:4
-    s=sides{i};
-    plot(msh.x(s),msh.y(s),'o','MarkerFaceColor',colors{i});
+fn=fieldnames(msh.boundary);
+for i=1:length(fn)
+    s=str2double(fn{i});
+    c=getfield(msh.boundary,fn{i});
+    plot(msh.x(s),msh.y(s),'o','MarkerFaceColor',colors{c});
 end
 axis equal
 axis off

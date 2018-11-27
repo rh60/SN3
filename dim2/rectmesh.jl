@@ -12,7 +12,7 @@ struct Mesh
     x::Vector{Float64}
     y::Vector{Float64}
     tri::Matrix{Int}
-    boundary::Vector{Vector{Int}}
+    boundary::Dict{Int,Int}
 end
 
 struct Pattern
@@ -185,15 +185,13 @@ function Mesh(R::Rectangle,nx::Int,ny::Int,n::Int=1)
         end
     end
 
-    bdry=[Int[],Int[],Int[],Int[]]
+    bdry=Dict{Int,Int}()
     for (k,(i,j)) in enumerate(Iterators.product(1:n1,1:n2))
-        if i==1 push!(bdry[4],k) end
-        if i==n1 push!(bdry[2],k) end
-        if j==1 push!(bdry[1],k) end
-        if j==n2 push!(bdry[3],k) end
+        if i==1 bdry[k]=4 end
+        if i==n1 bdry[k]=2 end
+        if j==1 bdry[k]=1 end
+        if j==n2 bdry[k]=3 end
     end
-    bdry[3]=reverse(bdry[3])
-    bdry[4]=reverse(bdry[4])
     Mesh(x,y,tri,bdry)
 end
 
