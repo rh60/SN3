@@ -8,8 +8,12 @@ struct BoundaryValueProblem
     q::Function # konvekce
     r::Function # reakce
     f::Function # pravá strana
-    xLeft::BoundaryCondition # okrajová podmínka vlevo
-    xRight::BoundaryCondition # vpravo
-    yLeft::BoundaryCondition # okrajová podmínka dole
-    yRight::BoundaryCondition # nahoře
+    vbc::Vector{BoundaryCondition} # okrajová podmínka vlevo
+end
+
+f1(x::Float64,y::Float64)=1.0
+f0(x::Float64,y::Float64)=0.0
+
+function BoundaryValueProblem(f::Function,vbc::Vector{BoundaryCondition})
+    BoundaryValueProblem(f1,f0,f0,f,vbc)
 end
