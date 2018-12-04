@@ -33,41 +33,43 @@ end
             gi=invJT*[a.L1[i] a.L2[i]]'
             gj=invJT*[a.L1[j] a.L2[j]]'
             g=gi[1,:].*gj[1,:]+gi[2,:].*gj[2,:]
-            push!(a.V,intSum(a.Q,p.*g)*J)
+            #push!(a.V,intSum(a.Q,p.*g)*J)
+            push!(a.V,intSum(a.Q,p.*g))
         end
-        a.b[t[i]] += intSum(a.Q,f.*a.L[i])*J
+        #a.b[t[i]] += intSum(a.Q,f.*a.L[i])*J
+        a.b[t[i]] += intSum(a.Q,f.*a.L[i])
     end
 end
 
-#function FEM
-msh=Mesh(Rectangle(0,1,0,1),30,30)
+function FEM(degree::Int, n::Int, nq::Int=4)
+    msh=Mesh(Rectangle(0,1,0,1),n,n)
 
-E=Lagrange(2)
-f(x,y)=-2*y*(y-1)-2*x*(x-1)
-vbc=[BoundaryCondition(0,f0) for i=1:4]
-bvp=BoundaryValueProblem(f,vbc)
+    E=Lagrange(degree)
+    f(x,y)=-2*y*(y-1)-2*x*(x-1)
+    vbc=[BoundaryCondition(0,f0) for i=1:4]
+    bvp=BoundaryValueProblem(f,vbc)
 
-a=Assembly(LagrangeMesh(msh,2),bvp,E,4)
-nt=size(a.msh.tri,1)
-for k=1:nt
-    CalculateContributionOnTriangle!(a,k)
+    a=Assembly(LagrangeMesh(msh,E.degree),bvp,E,4)
+    nt=size(a.msh.tri,1)
+    for k=1:nt
+        CalculateContributionOnTriangle!(a,k)
+    end
+    A=sparse(a.I,a.J,a.V)
+
+    dirt=Int[]
+    for ib=1:4
+        dirt = [dirt; a.msh.boundary[ib][:,1]; a.msh.boundary[ib][:,3:end][:] ]
+    end
+    A[dirt,:].=0
+    for i in dirt
+        A[i,i]=1
+    end
+    a.b[dirt].=0
+
+    U=A\a.b
+    u(x,y)=x*(x-1)*y*(y-1)
+    print("norm(u-U)="); display(norm(u.(a.msh.x,a.msh.y)-U,Inf))
+
+    I,J,V=findnz(A)
+    write_matfile("data/poisson.mat",msh=Refine(msh,degree),U=U,b=a.b,I=I,J=J,V=V)
 end
-A=sparse(a.I,a.J,a.V)
-dirt=Int[]
-for ib=1:4
-    global dirt = [dirt; a.msh.boundary[ib][:,1]; a.msh.boundary[ib][:,3] ]
-end
-A[dirt,:].=0
-for i in dirt
-    A[i,i]=1
-end
-a.b[dirt].=0
-
-U=A\a.b
-u(x,y)=x*(x-1)*y*(y-1)
-print("norm(u-U)="); display(norm(u.(a.msh.x,a.msh.y)-U,Inf))
-
-write_matfile("data/poisson.mat",msh=Refine(msh,2),U=U)
-
-
-#end
