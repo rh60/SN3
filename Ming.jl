@@ -1,5 +1,7 @@
 module Ming
 
-include(raw"source\ming.jl")
+export FEM
+
+include(raw"dim2\fem.jl")
 
 end
