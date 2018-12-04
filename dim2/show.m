@@ -1,18 +1,25 @@
 clear;clc;close;
-load('../data/msh.mat');
+load('../data/poisson.mat');
+
+showmsh(amsh)
+figure
+showmsh(msh)
+
+function showmsh(msh)
+
 tri=double(msh.tri(:,1:3));
 
 hold off
 triplot(tri,msh.x,msh.y);
 
-for i=1:length(msh.tri)
+for i=1:size(msh.tri,1)
     x=mean(msh.x(tri(i,1:3)));
     y=mean(msh.y(tri(i,1:3)));
-    text(x,y,int2str(i),'FontSize',8);
+    text(x,y,int2str(i),'FontSize',9);
 end
 
 for i=1:length(msh.x)    
-    text(msh.x(i),msh.y(i),int2str(i),'FontSize',7);    
+    text(msh.x(i),msh.y(i),int2str(i),'FontSize',8);    
 end    
 
 axis equal
@@ -68,4 +75,5 @@ function q=pinfo(ed,msh)
     end
     pause(2);
     delete(q);
+end
 end

@@ -19,7 +19,8 @@ struct Assembly
 end
 
 @inline function CalculateContributionOnTriangle!(a::Assembly,k::Int)
-    t=a.msh.tri[k,:]
+    loc2glob=a.msh.tri[k,:]
+    t=loc2glob[1:3]
     x=a.msh.x[t];y=a.msh.y[t];
     qx=affinity(x,a.Q.Points.x,a.Q.Points.y)
     qy=affinity(y,a.Q.Points.x,a.Q.Points.y)
@@ -29,7 +30,8 @@ end
     f=a.bvp.f.(qx,qy)
     for i=1:l
         for j=1:l
-            push!(a.I,t[i]); push!(a.J,t[j])
+            push!(a.I,loc2glob[i]);
+            push!(a.J,loc2glob[j])
             gi=invJT*[a.L1[i] a.L2[i]]'
             gj=invJT*[a.L1[j] a.L2[j]]'
             g=gi[1,:].*gj[1,:]+gi[2,:].*gj[2,:]
@@ -37,7 +39,7 @@ end
             push!(a.V,intSum(a.Q,p.*g))
         end
         #a.b[t[i]] += intSum(a.Q,f.*a.L[i])*J
-        a.b[t[i]] += intSum(a.Q,f.*a.L[i])
+        a.b[loc2glob[i]] += intSum(a.Q,f.*a.L[i])
     end
 end
 
@@ -45,11 +47,11 @@ function FEM(degree::Int, n::Int, nq::Int=4)
     msh=Mesh(Rectangle(0,1,0,1),n,n)
 
     E=Lagrange(degree)
-    f(x,y)=-2*y*(y-1)-2*x*(x-1)
+    f(x,y)=-32*y*(y-1)-32*x*(x-1)
     vbc=[BoundaryCondition(0,f0) for i=1:4]
     bvp=BoundaryValueProblem(f,vbc)
 
-    a=Assembly(LagrangeMesh(msh,E.degree),bvp,E,4)
+    a=Assembly(LagrangeMesh(msh,E.degree),bvp,E,nq)
     nt=size(a.msh.tri,1)
     for k=1:nt
         CalculateContributionOnTriangle!(a,k)
@@ -67,9 +69,9 @@ function FEM(degree::Int, n::Int, nq::Int=4)
     a.b[dirt].=0
 
     U=A\a.b
-    u(x,y)=x*(x-1)*y*(y-1)
+    u(x,y)=16*x*(x-1)*y*(y-1)
     print("norm(u-U)="); display(norm(u.(a.msh.x,a.msh.y)-U,Inf))
 
     I,J,V=findnz(A)
-    write_matfile("data/poisson.mat",msh=Refine(msh,degree),U=U,b=a.b,I=I,J=J,V=V)
+    write_matfile("data/poisson.mat",amsh=a.msh,msh=Refine(msh,degree),U=U,b=a.b,I=I,J=J,V=V)
 end
