@@ -10,7 +10,7 @@ struct BoundaryValueProblem
     q::Function # konvekce
     r::Function # reakce
     f::Function # pravá strana
-    vbc::Vector{BoundaryCondition} # okrajová podmínka vlevo
+    vbc::Vector{BoundaryCondition} # okrajové podmínky
 end
 
 f1(x::Float64,y::Float64)=1.0
