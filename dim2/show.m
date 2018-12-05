@@ -1,8 +1,8 @@
 clear;clc;close;
-load('../data/poisson.mat');
+load('../data/L.mat');
 
-showmsh(amsh)
-figure
+%showmsh(amsh)
+%figure
 showmsh(msh)
 
 function showmsh(msh)
@@ -11,16 +11,24 @@ tri=double(msh.tri(:,1:3));
 
 hold off
 triplot(tri,msh.x,msh.y);
+hold on
+scatter(msh.x,msh.y,'.');
 
-for i=1:size(msh.tri,1)
+nt=size(msh.tri,1)
+if nt<2000
+for i=1:nt
     x=mean(msh.x(tri(i,1:3)));
     y=mean(msh.y(tri(i,1:3)));
     text(x,y,int2str(i),'FontSize',9);
 end
+end
 
-for i=1:length(msh.x)    
+np=length(msh.x)
+if np<2000
+for i=1:np
     text(msh.x(i),msh.y(i),int2str(i),'FontSize',8);    
 end    
+end
 
 axis equal
 axis off
