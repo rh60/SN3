@@ -1,5 +1,7 @@
+@enum  BCenum Dirichlet=0 Newton=1
+
 struct BoundaryCondition
-    code::Int # 0 Dirichlet 1 Newton
+    code::BCenum # 0 Dirichlet 1 Newton
     value::Function
 end
 

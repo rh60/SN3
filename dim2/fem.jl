@@ -48,7 +48,7 @@ function FEM(degree::Int, n::Int, nq::Int=4)
 
     E=Lagrange(degree)
     f(x,y)=-32*y*(y-1)-32*x*(x-1)
-    vbc=[BoundaryCondition(0,f0) for i=1:4]
+    vbc=[BoundaryCondition(Dirichlet,f0) for i=1:4]
     bvp=BoundaryValueProblem(f,vbc)
 
     a=Assembly(LagrangeMesh(msh,E.degree),bvp,E,nq)
