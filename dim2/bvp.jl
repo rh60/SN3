@@ -7,7 +7,7 @@ end
 
 struct BoundaryValueProblem
     p::Function # difuzní koeficient
-    q::Function # konvekce
+    q::Vector{Function} # konvekce
     r::Function # reakce
     f::Function # pravá strana
     vbc::Vector{BoundaryCondition} # okrajové podmínky
@@ -17,5 +17,5 @@ f1(x::Float64,y::Float64)=1.0
 f0(x::Float64,y::Float64)=0.0
 
 function BoundaryValueProblem(f::Function,vbc::Vector{BoundaryCondition})
-    BoundaryValueProblem(f1,f0,f0,f,vbc)
+    BoundaryValueProblem(f1,[f0, f0],f0,f,vbc)
 end
