@@ -1,0 +1,15 @@
+u:=(x,y)->x^2+2*y^3;
+p:=exp(x);
+q1:=3*x;
+q2:=2*y;
+r:=-6;
+
+u1:=D[1](u):u2:=D[2](u):
+ux:=u1(x,y);uy:=u2(x,y);
+pux:=unapply(p*ux,x,y);puy:=unapply(p*uy,x,y);
+qux:=unapply(q1*ux,x,y);quy:=unapply(q2*uy,x,y);
+puxx:=D[1](pux);puyy:=D[2](puy);
+ru:=unapply(r*u(x,y),x,y);        
+f=simplify((-puxx-puyy+qux+quy+ru)(x,y));
+u(x,-1),u(1,y);
+u2(x,1),-u1(-1,y);
