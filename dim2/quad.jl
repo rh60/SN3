@@ -1,9 +1,21 @@
+abstract type Quad end
+
+struct QuadSeg <: Quad
+    Points::Vector{Float64}
+    Weights::Vector{Float64}
+    function QuadSeg(nq::Int)
+        n=div(nq,2)+1
+        x,w = gausslegendre(n)
+        new( (x.+1)/2, w/2 )
+    end
+end
+
 struct Coords
     x::Vector{Float64}
     y::Vector{Float64}
 end
 
-struct QuadTri
+struct QuadTri <: Quad
     Points::Coords
     Weights::Vector{Float64}
     function QuadTri(nq::Int=1)
@@ -661,7 +673,7 @@ struct QuadTri
     end
 end
 
-@inline function intSum(Q::QuadTri,values::Vector{Float64})::Float64
+@inline function intSum(Q::Quad,values::Vector{Float64})::Float64
     values⋅Q.Weights
 end
 

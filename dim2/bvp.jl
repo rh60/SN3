@@ -1,4 +1,4 @@
-@enum  BCenum Dirichlet=0 Newton=1
+@enum  BCenum Dirichlet=0 Neumann=1
 
 struct BoundaryCondition
     code::BCenum
@@ -16,6 +16,6 @@ end
 f1(x::Float64,y::Float64)=1.0
 f0(x::Float64,y::Float64)=0.0
 
-function BoundaryValueProblem(f::Function,vbc::Vector{BoundaryCondition})
+function Poisson(f::Function,vbc::Vector{BoundaryCondition})
     BoundaryValueProblem(f1,[f0, f0],f0,f,vbc)
 end

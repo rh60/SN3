@@ -1,5 +1,5 @@
 clear;clc;close;
-load('../data/L.mat');
+load('../data/matlab.mat');
 
 %showmsh(amsh)
 %figure
