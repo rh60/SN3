@@ -35,4 +35,4 @@ function example(degree::Int, nq::Int=4)
     write_matfile("data/ex5.mat",a=a,msh=Refine(msh,degree),U=U,I=I,J=J,V=V)
 end
 
-example(4,8)
+example(2)
