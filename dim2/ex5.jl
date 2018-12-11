@@ -21,7 +21,7 @@ function u(x::Float64,y::Float64)::Float64
     end
 end
 
-function example(degree::Int, n::Int, nq::Int=4)
+function example(degree::Int, nq::Int=4)
     msh=loadmsh("geo/L.mat")
 
     bc=[BoundaryCondition(Dirichlet,u)]
@@ -32,7 +32,7 @@ function example(degree::Int, n::Int, nq::Int=4)
     print("norm(u-U)="); display(norm(u.(a.msh.x,a.msh.y)-U,Inf))
 
     I,J,V=findnz(A)
-    write_matfile("data/ex4.mat",a=a,msh=Refine(msh,degree),U=U,I=I,J=J,V=V)
+    write_matfile("data/ex5.mat",a=a,msh=Refine(msh,degree),U=U,I=I,J=J,V=V)
 end
 
-example(4,10,6)
+example(4,8)

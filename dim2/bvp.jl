@@ -21,5 +21,5 @@ function Poisson(f::Function,vbc::Vector{BoundaryCondition})
 end
 
 function Laplace(vbc::Vector{BoundaryCondition})
-    BoundaryValueProblem(f0,[f0, f0],f0,f,vbc)
+    BoundaryValueProblem(f1,[f0, f0],f0,f0,vbc)
 end
