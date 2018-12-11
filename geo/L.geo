@@ -27,8 +27,6 @@ Curve Loop(1) = {1, 2, 3, 4, 5, 6};
 //+
 Plane Surface(1) = {1};
 //+
-Physical Curve("bdry1") = {1, 2, 3, 4, 5};
-//+
-Physical Curve("bdry2") = {6};
+Physical Curve("bdry1") = {1, 2, 3, 4, 5, 6};
 //+
 Physical Surface("omega") = {1};
