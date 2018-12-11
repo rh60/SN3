@@ -19,3 +19,7 @@ f0(x::Float64,y::Float64)=0.0
 function Poisson(f::Function,vbc::Vector{BoundaryCondition})
     BoundaryValueProblem(f1,[f0, f0],f0,f,vbc)
 end
+
+function Laplace(vbc::Vector{BoundaryCondition})
+    BoundaryValueProblem(f0,[f0, f0],f0,f,vbc)
+end
