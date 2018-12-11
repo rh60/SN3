@@ -13,7 +13,7 @@ end
 
 function u(x::Float64,y::Float64)::Float64
     r=sqrt(x^2+y^2)
-    a=atan(x/y)
+    a=atan(y,x)
     if r==0
         return 0.0
     else
@@ -35,4 +35,4 @@ function example(degree::Int, nq::Int=4)
     write_matfile("data/ex5.mat",a=a,msh=Refine(msh,degree),U=U,I=I,J=J,V=V)
 end
 
-example(2)
+example(3,4)
