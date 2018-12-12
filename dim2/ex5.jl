@@ -32,7 +32,10 @@ function example(degree::Int, nq::Int=4)
     print("norm(u-U)="); display(norm(u.(a.msh.x,a.msh.y)-U,Inf))
 
     I,J,V=findnz(A)
-    write_matfile("data/ex5.mat",a=a,msh=Refine(msh,degree),U=U,I=I,J=J,V=V)
+    rmsh=Refine(msh,degree)
+    write_matfile("data/ex5.mat",a=a,msh=rmsh,U=U,I=I,J=J,V=V)
+    write_vtkfile("data/ex5","U",rmsh.x,rmsh.y,rmsh.tri,U)
 end
 
 example(3,4)
+@async run(`"C:/Program Files/ParaView 5.6.0-Windows-msvc2015-64bit/bin/paraview.exe" data/ex5.pvsm`)
