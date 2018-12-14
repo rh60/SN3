@@ -14,10 +14,7 @@ end
 function u(x::Float64,y::Float64)::Float64
     r=sqrt(x^2+y^2)
     a=atan(y,x)
-    if r==0
-        return 0.0
-    else
-        return r^(2/3)*sin(2*a/3+π/3)
+    return r^(2/3)*sin(2*a/3+π/3)
     end
 end
 
