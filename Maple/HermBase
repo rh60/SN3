@@ -1,0 +1,16 @@
+P:=x->a*x^3+b*x^2+c*x+d:
+
+H:=():H2:=():
+y:=[0,0,0,0]:
+for i from 1 to 4 do
+y[i]:=1:
+p:=solve({P(0)=y[1],D(P)(0)=y[2],P(h)=y[3],D(P)(h)=y[4]},{a,b,c,d}):
+y[i]:=0:
+p:=subs(p,P(x));
+H:=H,p;
+H2:=H2,diff(p,x$2);
+end:
+
+seq(CodeGeneration['Julia'](PolynomialTools[CoefficientVector](H[i],x)),i=1..4);
+CodeGeneration['Julia'](Matrix(4,(i,j)->int(H2[i]*H2[j],x=0..h)));
+CodeGeneration['Julia'](Vector(4,i->int(H[i],x=0..h)));
