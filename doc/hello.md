@@ -1,6 +1,6 @@
 # Metoda konečných prvků
 
-![](https://mfem.org/img/examples/ex2.png)
+![](out.svg)
 
 ## Klasická formulace
 
